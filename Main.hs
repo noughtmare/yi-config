@@ -27,6 +27,7 @@ import Yi.Mode.Haskell (fastMode, cleverMode, preciseMode)
 import Yi.Config.Simple (addMode)
 
 import qualified Intero
+import Intero (Intero (Intero))
 
 import Control.Monad.Base (liftBase)
 import Control.Monad (void)
@@ -36,8 +37,11 @@ import qualified Data.Attoparsec.Text as P
 import qualified Yi.Rope as R
 import Control.Concurrent.MVar
 import Data.Text (Text, unpack, pack)
+import Data.Binary
+import Yi.Types (YiVariable)
+import Data.Default (Default, def)
 
-data CommandLineOptions = CommandLineOptions 
+data CommandLineOptions = CommandLineOptions
   { startOnLine :: Maybe Int
   , mode :: Maybe String
   , files :: [String]
@@ -64,7 +68,6 @@ commandLineOptions = flag' Nothing
 
 main :: IO ()
 main = do
-    interoVar <- newEmptyMVar
     mayClo <- execParser opts
     case mayClo of
       Nothing -> putStrLn "Yi 0.14.0"
@@ -72,7 +75,7 @@ main = do
         let openFileActions = intersperse (EditorA newTabE) (map (YiA . openNewFile) (files clo))
             moveLineAction  = YiA $ withCurrentBuffer (lineMoveRel (fromMaybe 0 (startOnLine clo)))
         cfg <- execStateT
-            (runConfigM (myConfig interoVar (mode clo) >> (startActionsA .= (openFileActions ++ [moveLineAction]))))
+            (runConfigM (myConfig (mode clo) >> (startActionsA .= (openFileActions ++ [moveLineAction]))))
             defaultConfig
         startEditor cfg Nothing
   where
@@ -81,8 +84,8 @@ main = do
     <> progDesc "Edit files"
     <> header "Yi - a flexible and extensible text editor written in haskell")
 
-myConfig :: MVar Intero.Intero -> Maybe String -> ConfigM ()
-myConfig interoVar m = do
+myConfig :: Maybe String -> ConfigM ()
+myConfig m = do
   configureVim
   configureVty
   case m of
@@ -93,32 +96,43 @@ myConfig interoVar m = do
     _ -> addMode (cleverMode & modeAdjustBlockA .~ (\_ _ -> return ()))
   configureJavaScriptMode
   configureMiscModes
-  defaultKmA .= myKeymapSet interoVar
+  defaultKmA .= myKeymapSet
 
-myKeymapSet :: MVar Intero.Intero -> KeymapSet
-myKeymapSet interoVar = V.mkKeymapSet $ V.defVimConfig `override` \super this ->
+-- Intero
+
+instance Binary Intero where
+  put _ = return ()
+  get = return def
+instance Default Intero where
+  def = Intero Nothing
+instance YiVariable Intero
+
+myKeymapSet :: KeymapSet
+myKeymapSet = V.mkKeymapSet $ V.defVimConfig `override` \super this ->
   let eval = V.pureEval this
-  in super { V.vimExCommandParsers = exInteroUses interoVar : exInteroTypeAt interoVar : exInteroEval interoVar : exInteroLocAt interoVar : exInteroStart interoVar : V.vimExCommandParsers super }
+  in super { V.vimExCommandParsers = exInteroUses : exInteroTypeAt : exInteroEval : exInteroLocAt : exInteroStart : V.vimExCommandParsers super }
 
-exInteroStart :: MVar Intero.Intero -> V.EventString -> Maybe V.ExCommand
-exInteroStart interoVar "intero-start" = Just $ V.impureExCommand
+exInteroStart :: V.EventString -> Maybe V.ExCommand
+exInteroStart "intero-start" = Just $ V.impureExCommand
   { V.cmdShow = "intero-start"
   , V.cmdAction = YiA $ do
-     b <- liftBase $ isEmptyMVar interoVar
-     if b
-       then liftBase (Intero.start "." >>= putMVar interoVar)
-       else errorEditor "Cannot intero-start: Already started"
+     Intero intero <- getEditorDyn :: YiM Intero
+     case intero of
+       -- TODO: change "." into actual directory
+       Nothing -> liftBase (Intero.start ".") >>= putEditorDyn . Intero . Just
+       Just _ -> errorEditor "Cannot start intero: Already started"
   }
-exInteroStart _ _ = Nothing
+exInteroStart _ = Nothing
 
-exInteroEval interoVar = Common.parse $ do
+exInteroEval = Common.parse $ do
   void $ P.string "intero-eval"
   void $ P.many1 P.space
   command <- P.takeWhile (const True)
   return $ Common.impureExCommand
     { V.cmdShow = "intero-eval " <> command
     , V.cmdAction = YiA $ do
-        mayIntero <- liftBase $ tryReadMVar interoVar 
+        errorEditor (command)
+        Intero mayIntero <- getEditorDyn :: YiM Intero
         case mayIntero of
           Nothing -> errorEditor "Cannot intero-eval: Intero not initialized"
           Just intero -> do
@@ -126,34 +140,34 @@ exInteroEval interoVar = Common.parse $ do
             inNewBuffer "*intero*" (R.fromString res)
     }
 
-exInteroLocAt interoVar = Common.parse $ do
+exInteroLocAt = Common.parse $ do
   void $ P.string "intero-loc-at"
   return $ Common.impureExCommand
      { V.cmdShow = "intero-loc-at"
-     , V.cmdAction = YiA $ interoLocAt interoVar
+     , V.cmdAction = YiA interoLocAt
      }
 
-exInteroUses interoVar = Common.parse $ do
+exInteroUses = Common.parse $ do
   void $ P.string "intero-uses"
   return $ Common.impureExCommand
     { V.cmdShow = "intero-uses"
-    , V.cmdAction = YiA $ interoUses interoVar
+    , V.cmdAction = YiA interoUses
     }
 
-exInteroTypeAt interoVar = Common.parse $ do
+exInteroTypeAt = Common.parse $ do
   void $ P.string "intero-type-at"
   return $ Common.impureExCommand
     { V.cmdShow = "intero-type-at"
-    , V.cmdAction = YiA $ interoTypeAt interoVar
+    , V.cmdAction = YiA interoTypeAt
     }
 
-interoLocAt :: MVar Intero.Intero -> YiM ()
-interoLocAt interoVar = do
+interoLocAt :: YiM ()
+interoLocAt = do
   mayFile <- withCurrentBuffer $ gets file
   case mayFile of
     Nothing -> errorEditor "Cannot intero-loc-at: Not in file"
     Just file -> do
-      mayIntero <- liftBase $ tryReadMVar interoVar
+      Intero mayIntero <- getEditorDyn :: YiM Intero
       case mayIntero of
         Nothing -> errorEditor "Cannot intero-loc-at: Intero not initialized"
         Just intero -> do
@@ -162,14 +176,14 @@ interoLocAt interoVar = do
           name <- withCurrentBuffer $ readRegionRopeWithStyleB region Inclusive
           res <- liftBase $ Intero.locAt intero file range (R.toString name)
           inNewBuffer "*intero*" (R.fromString res)
-              
-interoUses :: MVar Intero.Intero -> YiM ()
-interoUses interoVar = do
+
+interoUses :: YiM ()
+interoUses = do
   mayFile <- withCurrentBuffer $ gets file
   case mayFile of
     Nothing -> errorEditor "Cannot intero-uses: Not in file"
     Just file -> do
-      mayIntero <- liftBase $ tryReadMVar interoVar
+      Intero mayIntero <- getEditorDyn :: YiM Intero
       case mayIntero of
         Nothing -> errorEditor "Cannot intero-uses: Intero not initialized"
         Just intero -> do
@@ -179,13 +193,13 @@ interoUses interoVar = do
           res <- liftBase $ Intero.uses intero file range (R.toString name)
           inNewBuffer "*intero*" (R.fromString res)
 
-interoTypeAt :: MVar Intero.Intero -> YiM ()
-interoTypeAt interoVar = do
+interoTypeAt :: YiM ()
+interoTypeAt = do
   mayFile <- withCurrentBuffer $ gets file
   case mayFile of
     Nothing -> errorEditor "Cannot intero-type-at: Not in file"
     Just file -> do
-      mayIntero <- liftBase $ tryReadMVar interoVar
+      Intero mayIntero <- getEditorDyn :: YiM Intero
       case mayIntero of
         Nothing -> errorEditor "Cannot intero-type-at: Intero not initialized"
         Just intero -> do
@@ -194,7 +208,7 @@ interoTypeAt interoVar = do
           name <- withCurrentBuffer $ readRegionRopeWithStyleB region Inclusive
           res <- liftBase $ Intero.typeAt intero file range (R.toString name)
           inNewBuffer "*intero*" (R.fromString res)
-          
+
 regionToRange :: Region -> YiM (Int,Int,Int,Int)
 regionToRange region = withCurrentBuffer $ do
   line  <- lineOf $ regionStart region

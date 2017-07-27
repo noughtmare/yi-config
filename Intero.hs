@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
-module Intero (Intero, start, locAt, uses, typeAt, eval) where
+module Intero (Intero (Intero), start, locAt, uses, typeAt, eval) where
 
 import Control.Exception
 import Control.Concurrent.MVar
@@ -8,26 +8,27 @@ import Control.Concurrent
 import System.IO
 import System.Process
 import Control.Monad
+import Data.Default
 
 -- TODO: remove the duplication
-data Request 
+data Request
   = Uses   FilePath (Int,Int,Int,Int) String (MVar String)
   | TypeAt FilePath (Int,Int,Int,Int) String (MVar String)
   | LocAt  FilePath (Int,Int,Int,Int) String (MVar String)
   | Eval   String                            (MVar String)
 
 type Repl = (String -> IO String)
-type Intero = MVar Request
+newtype Intero = Intero (Maybe (MVar Request))
 
 instance Show (MVar Request) where
   show _ = "Intero"
 
 query :: Request -> String
-query (Uses   file (line,col,line',col') name _) = 
+query (Uses   file (line,col,line',col') name _) =
   concat [":uses "   , file, " ", unwords (map show [line,col,line',col']), " ", name]
-query (TypeAt file (line,col,line',col') name _) = 
+query (TypeAt file (line,col,line',col') name _) =
   concat [":type-at ", file, " ", unwords (map show [line,col,line',col']), " ", name]
-query (LocAt  file (line,col,line',col') name _) = 
+query (LocAt  file (line,col,line',col') name _) =
   concat [":loc-at " , file, " ", unwords (map show [line,col,line',col']), " ", name]
 query (Eval q _) = q
 
@@ -39,10 +40,10 @@ handleReq repl req@(Eval   _     res) = putMVar res =<< id (repl (query req))
 
 -- Code taken from:
 -- https://github.com/commercialhaskell/intero/blob/28609611c9f7c7d63370ce66e8ebb97676a8374e/src/test/Main.hs#L219-L268
-start :: FilePath -> IO Intero
+start :: FilePath -> IO (MVar Request)
 start path = do
   req <- newEmptyMVar
-  (inp,out,err,pid) <- 
+  (inp,out,err,pid) <-
     catch (runInteractiveProcess
              "stack"
              ["ghci","--with-ghc","intero"]
@@ -80,25 +81,25 @@ start path = do
                    (\(_ :: IOException) -> return [])
         else return []
 
-uses :: Intero -> FilePath -> (Int,Int,Int,Int) -> String -> IO String
+uses :: MVar Request -> FilePath -> (Int,Int,Int,Int) -> String -> IO String
 uses req file range name = do
   result <- newEmptyMVar
   putMVar req (Uses file range name result)
   takeMVar result
 
-typeAt :: Intero -> FilePath -> (Int,Int,Int,Int) -> String -> IO String
+typeAt :: MVar Request -> FilePath -> (Int,Int,Int,Int) -> String -> IO String
 typeAt req file range name = do
   result <- newEmptyMVar
   putMVar req (TypeAt file range name result)
   takeMVar result
 
-locAt :: Intero -> FilePath -> (Int,Int,Int,Int) -> String -> IO String
+locAt :: MVar Request -> FilePath -> (Int,Int,Int,Int) -> String -> IO String
 locAt req file range name = do
   result <- newEmptyMVar
   putMVar req (LocAt file range name result)
   takeMVar result
 
-eval :: Intero -> String -> IO String
+eval :: MVar Request -> String -> IO String
 eval req q = do
   result <- newEmptyMVar
   putMVar req (Eval q result)

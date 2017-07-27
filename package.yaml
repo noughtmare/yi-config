@@ -24,6 +24,8 @@ dependencies:
     - transformers-base
     - attoparsec
     - text
+    - binary
+    - data-default
 
 executables:
     yi:

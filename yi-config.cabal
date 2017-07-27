@@ -38,6 +38,8 @@ executable yi
     , transformers-base
     , attoparsec
     , text
+    , binary
+    , data-default
   other-modules:
       Intero
   default-language: Haskell2010
@@ -62,5 +64,7 @@ benchmark highlighter
     , transformers-base
     , attoparsec
     , text
+    , binary
+    , data-default
     , yi-language, criterion, deepseq
   default-language: Haskell2010
