@@ -26,6 +26,7 @@ dependencies:
     - text
     - binary
     - data-default
+    - yi-language
 
 executables:
     yi:

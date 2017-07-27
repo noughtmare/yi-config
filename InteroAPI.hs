@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
-module Intero (Intero (Intero), start, locAt, uses, typeAt, eval) where
+module InteroAPI (Request, Intero (Intero), start, locAt, uses, typeAt, eval) where
 
 import Control.Exception
 import Control.Concurrent.MVar
@@ -8,7 +8,6 @@ import Control.Concurrent
 import System.IO
 import System.Process
 import Control.Monad
-import Data.Default
 
 -- TODO: remove the duplication
 data Request

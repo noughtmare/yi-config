@@ -40,8 +40,10 @@ executable yi
     , text
     , binary
     , data-default
+    , yi-language
   other-modules:
-      Intero
+      InteroAPI
+      Yi.Intero
   default-language: Haskell2010
 
 benchmark highlighter
@@ -66,5 +68,6 @@ benchmark highlighter
     , text
     , binary
     , data-default
+    , yi-language
     , yi-language, criterion, deepseq
   default-language: Haskell2010
