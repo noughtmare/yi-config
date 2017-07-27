@@ -1,0 +1,66 @@
+-- This file has been generated from package.yaml by hpack version 0.17.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           yi-config
+version:        0.14.0
+synopsis:       Yi editor config of Noughtmare
+category:       Yi
+homepage:       https://github.com/noughtmare/yi-config#readme
+bug-reports:    https://github.com/noughtmare/yi-config/issues
+maintainer:     noughtmare@openmailbox.org
+license:        GPL-2
+build-type:     Simple
+cabal-version:  >= 1.10
+
+source-repository head
+  type: git
+  location: https://github.com/noughtmare/yi-config
+
+executable yi
+  main-is: Main.hs
+  hs-source-dirs:
+      ./.
+  ghc-options: -Wall -ferror-spans -threaded
+  build-depends:
+      base >= 4.8 && < 5
+    , microlens-platform >= 0.3.4.0
+    , mtl >= 2.2.1
+    , optparse-applicative >= 0.13.0.0
+    , yi-core >= 0.14.0
+    , yi-misc-modes >= 0.14.0
+    , yi-mode-haskell >= 0.14.0
+    , yi-mode-javascript >= 0.14.0
+    , yi-rope >= 0.7.0.1
+    , yi-keymap-vim >= 0.14.0
+    , yi-frontend-vty >= 0.14.0
+    , process
+    , transformers-base
+    , attoparsec
+    , text
+  other-modules:
+      Intero
+  default-language: Haskell2010
+
+benchmark highlighter
+  type: exitcode-stdio-1.0
+  main-is: test/Main.hs
+  ghc-options: -Wall -ferror-spans -threaded
+  build-depends:
+      base >= 4.8 && < 5
+    , microlens-platform >= 0.3.4.0
+    , mtl >= 2.2.1
+    , optparse-applicative >= 0.13.0.0
+    , yi-core >= 0.14.0
+    , yi-misc-modes >= 0.14.0
+    , yi-mode-haskell >= 0.14.0
+    , yi-mode-javascript >= 0.14.0
+    , yi-rope >= 0.7.0.1
+    , yi-keymap-vim >= 0.14.0
+    , yi-frontend-vty >= 0.14.0
+    , process
+    , transformers-base
+    , attoparsec
+    , text
+    , yi-language, criterion, deepseq
+  default-language: Haskell2010

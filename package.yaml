@@ -1,0 +1,36 @@
+name: yi-config
+version: 0.14.0
+synopsis: Yi editor config of Noughtmare
+maintainer: noughtmare@openmailbox.org
+license: GPL-2
+github: noughtmare/yi-config
+category: Yi
+
+ghc-options: -Wall -ferror-spans -threaded
+
+dependencies:
+    - base >= 4.8 && < 5
+    - microlens-platform >= 0.3.4.0
+    - mtl >= 2.2.1
+    - optparse-applicative >= 0.13.0.0
+    - yi-core >= 0.14.0
+    - yi-misc-modes >= 0.14.0
+    - yi-mode-haskell >= 0.14.0
+    - yi-mode-javascript >= 0.14.0
+    - yi-rope >= 0.7.0.1
+    - yi-keymap-vim >= 0.14.0
+    - yi-frontend-vty >= 0.14.0
+    - process
+    - transformers-base
+    - attoparsec
+    - text
+
+executables:
+    yi:
+        main: Main.hs
+        source-dirs: .
+
+benchmarks:
+    highlighter:
+        main: test/Main.hs
+        dependencies: yi-language, criterion, deepseq
