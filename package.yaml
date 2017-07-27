@@ -20,20 +20,11 @@ dependencies:
     - yi-rope >= 0.7.0.1
     - yi-keymap-vim >= 0.14.0
     - yi-frontend-vty >= 0.14.0
-    - process
-    - transformers-base
     - attoparsec
     - text
-    - binary
-    - data-default
-    - yi-language
+    - yi-intero
 
 executables:
     yi:
         main: Main.hs
         source-dirs: .
-
-benchmarks:
-    highlighter:
-        main: test/Main.hs
-        dependencies: yi-language, criterion, deepseq
