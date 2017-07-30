@@ -97,7 +97,7 @@ myKeymapSet = V.mkKeymapSet $ V.defVimConfig `override` \super _ -> super
   }
 
 interoExCommands :: [V.EventString -> Maybe V.ExCommand]
-interoExCommands = [exInteroUses,exInteroTypeAt,exInteroEval,exInteroLocAt,exInteroStart]
+interoExCommands = [exInteroUses,exInteroTypeAt,exInteroEval,exInteroLocAt,exInteroStart,exInteroJump]
 
 exInteroEval :: V.EventString -> Maybe V.ExCommand
 exInteroEval = Common.parse $ do
@@ -123,3 +123,4 @@ exInteroStart  = parseText "intero-start"   interoStart
 exInteroLocAt  = parseText "intero-loc-at"  interoLocAt
 exInteroUses   = parseText "intero-uses"    interoUses
 exInteroTypeAt = parseText "intero-type-at" interoTypeAt
+exInteroJump   = parseText "intero-jump"    interoJump

@@ -1,6 +1,6 @@
 resolver: lts-9.0
 packages:
     - .
-    - location: /home/jaro/haskell/yi-intero
+    - location: /home/jaro/haskell/yi/yi-intero
       extra-dep: true
 extra-deps: []

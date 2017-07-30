@@ -22,7 +22,7 @@ dependencies:
     - yi-frontend-vty >= 0.14.0
     - attoparsec
     - text
-    - yi-intero
+    - yi-intero >= 0.14.1
 
 executables:
     yi:

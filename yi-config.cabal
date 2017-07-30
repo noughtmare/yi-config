@@ -37,27 +37,5 @@ executable yi
     , yi-frontend-vty >= 0.14.0
     , attoparsec
     , text
-    , yi-intero
-  default-language: Haskell2010
-
-benchmark highlighter
-  type: exitcode-stdio-1.0
-  main-is: test/Main.hs
-  ghc-options: -Wall -ferror-spans -threaded
-  build-depends:
-      base >= 4.8 && < 5
-    , microlens-platform >= 0.3.4.0
-    , mtl >= 2.2.1
-    , optparse-applicative >= 0.13.0.0
-    , yi-core >= 0.14.0
-    , yi-misc-modes >= 0.14.0
-    , yi-mode-haskell >= 0.14.0
-    , yi-mode-javascript >= 0.14.0
-    , yi-rope >= 0.7.0.1
-    , yi-keymap-vim >= 0.14.0
-    , yi-frontend-vty >= 0.14.0
-    , attoparsec
-    , text
-    , yi-intero
-    , yi-language, criterion, deepseq
+    , yi-intero >= 0.14.1
   default-language: Haskell2010
