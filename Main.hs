@@ -15,22 +15,22 @@ import Options.Applicative
 import Yi hiding (option)
 import Yi.Config.Simple.Types
 import Yi.Buffer.Misc (lineMoveRel)
-
 import Yi.Config.Default.JavaScriptMode (configureJavaScriptMode)
 import Yi.Config.Default.MiscModes      (configureMiscModes)
-
 import Yi.Config.Default.Vim (configureVim)
 import Yi.Config.Default.Vty (configureVty)
-
 import Yi.Mode.Haskell (fastMode, cleverMode, preciseMode)
 import Yi.Config.Simple (addMode)
 
 import Control.Monad (void)
 
-import Yi.Intero
-import qualified Data.Attoparsec.Text as P
-import qualified Yi.Keymap.Vim.Ex.Commands.Common as Common
-import Data.Text (Text,unpack)
+-- Intero
+--import Yi.Intero
+--import qualified Data.Attoparsec.Text as P
+--import qualified Yi.Keymap.Vim.Ex.Commands.Common as Common
+--import Data.Text (Text,unpack)
+
+-- 
 
 data CommandLineOptions = CommandLineOptions
   { startOnLine :: Maybe Int
@@ -87,49 +87,52 @@ myConfig m = do
     _ -> addMode (cleverMode & modeAdjustBlockA .~ (\_ _ -> return ()))
   configureJavaScriptMode
   configureMiscModes
-  defaultKmA .= myKeymapSet
+--  defaultKmA .= myKeymapSet
 
 -- Intero
 
-myKeymapSet :: KeymapSet
-myKeymapSet = V.mkKeymapSet $ V.defVimConfig `override` \super _ -> super
-  { V.vimExCommandParsers = interoExCommands <> V.vimExCommandParsers super
-  }
-
-interoExCommands :: [V.EventString -> Maybe V.ExCommand]
-interoExCommands = [exInteroUses,exInteroTypeAt,exInteroEval,exInteroLocAt,exInteroStart,exInteroJump,exInteroModule]
-
-exInteroEval :: V.EventString -> Maybe V.ExCommand
-exInteroEval = Common.parse $ do
-  void $ P.string "intero-eval"
-  void $ P.many1 P.space
-  instr <- P.takeWhile (const True)
-  return $ Common.impureExCommand
-    { V.cmdShow = "intero-eval " <> instr
-    , V.cmdAction = interoEval (unpack instr)
-    }
-
-parseText :: Text -> Action -> V.EventString -> Maybe V.ExCommand
-parseText txt action = Common.parse $ do
-  void $ P.string txt
-  return $ Common.impureExCommand
-    { V.cmdShow = txt
-    , V.cmdAction = action
-    }
-
-exInteroStart, exInteroLocAt,exInteroUses,exInteroTypeAt
-  :: V.EventString -> Maybe V.ExCommand
-exInteroStart  = parseText "intero-start"   interoStart
-exInteroLocAt  = parseText "intero-loc-at"  interoLocAt
-exInteroUses   = parseText "intero-uses"    interoUses
-exInteroTypeAt = parseText "intero-type-at" interoTypeAt
-exInteroJump   = parseText "intero-jump"    interoJump
-
-exInteroModule = Common.parse $ do
-  void $ P.string "intero-module"
-  void $ P.many1 P.space
-  moduleName <- P.takeWhile (const True)
-  return $ Common.impureExCommand
-    { V.cmdShow = "intero-module " <> moduleName
-    , V.cmdAction = interoModule (unpack moduleName)
-    }
+-- myKeymapSet :: KeymapSet
+-- myKeymapSet = V.mkKeymapSet $ V.defVimConfig `override` \super _ -> super
+--   { V.vimExCommandParsers = interoExCommands <> V.vimExCommandParsers super
+--   }
+-- 
+-- interoExCommands :: [V.EventString -> Maybe V.ExCommand]
+-- interoExCommands = [exInteroUses,exInteroTypeAt,exInteroEval,exInteroLocAt,exInteroStart,exInteroJump,exInteroModule]
+-- 
+-- exInteroEval :: V.EventString -> Maybe V.ExCommand
+-- exInteroEval = Common.parse $ do
+--   void $ P.string "intero-eval"
+--   void $ P.many1 P.space
+--   instr <- P.takeWhile (const True)
+--   return $ Common.impureExCommand
+--     { V.cmdShow = "intero-eval " <> instr
+--     , V.cmdAction = interoEval (unpack instr)
+--     }
+-- 
+-- parseText :: Text -> Action -> V.EventString -> Maybe V.ExCommand
+-- parseText txt action = Common.parse $ do
+--   void $ P.string txt
+--   return $ Common.impureExCommand
+--     { V.cmdShow = txt
+--     , V.cmdAction = action
+--     }
+-- 
+-- exInteroStart, exInteroLocAt,exInteroUses,exInteroTypeAt
+--   :: V.EventString -> Maybe V.ExCommand
+-- exInteroStart  = parseText "intero-start"   interoStart
+-- exInteroLocAt  = parseText "intero-loc-at"  interoLocAt
+-- exInteroUses   = parseText "intero-uses"    interoUses
+-- exInteroTypeAt = parseText "intero-type-at" interoTypeAt
+-- exInteroJump   = parseText "intero-jump"    interoJump
+-- 
+-- exInteroModule = Common.parse $ do
+--   void $ P.string "intero-module"
+--   void $ P.many1 P.space
+--   moduleName <- P.takeWhile (const True)
+--   return $ Common.impureExCommand
+--     { V.cmdShow = "intero-module " <> moduleName
+--     , V.cmdAction = interoModule (unpack moduleName)
+--     }
+-- 
+-- -- Language Server Protocol (Haskell IDE Engine)
+-- 

@@ -1,4 +1,4 @@
--- This file has been generated from package.yaml by hpack version 0.17.0.
+-- This file has been generated from package.yaml by hpack version 0.18.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -32,10 +32,9 @@ executable yi
     , yi-misc-modes >= 0.14.0
     , yi-mode-haskell >= 0.14.0
     , yi-mode-javascript >= 0.14.0
-    , yi-rope >= 0.7.0.1
     , yi-keymap-vim >= 0.14.0
     , yi-frontend-vty >= 0.14.0
+    , yi-rope >= 0.9
     , attoparsec
     , text
-    , yi-intero >= 0.14.1
   default-language: Haskell2010

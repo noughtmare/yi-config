@@ -17,12 +17,13 @@ dependencies:
     - yi-misc-modes >= 0.14.0
     - yi-mode-haskell >= 0.14.0
     - yi-mode-javascript >= 0.14.0
-    - yi-rope >= 0.7.0.1
     - yi-keymap-vim >= 0.14.0
     - yi-frontend-vty >= 0.14.0
+    - yi-rope >= 0.9
     - attoparsec
     - text
-    - yi-intero >= 0.14.1
+      #     - yi-intero >= 0.14.1
+      #     - haskell-lsp-client
 
 executables:
     yi:
