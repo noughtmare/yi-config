@@ -1,9 +1,5 @@
--- This file has been generated from package.yaml by hpack version 0.18.1.
---
--- see: https://github.com/sol/hpack
-
 name:           yi-config
-version:        0.14.0
+version:        0.17.1
 synopsis:       Yi editor config of Noughtmare
 category:       Yi
 homepage:       https://github.com/noughtmare/yi-config#readme
@@ -20,21 +16,23 @@ source-repository head
 
 executable yi
   main-is: Main.hs
+  other-modules:
+      Paths_yi_config
   hs-source-dirs:
       ./.
   ghc-options: -Wall -ferror-spans -threaded
   build-depends:
-      base >= 4.8 && < 5
-    , microlens-platform >= 0.3.4.0
-    , mtl >= 2.2.1
-    , optparse-applicative >= 0.13.0.0
-    , yi-core >= 0.14.0
-    , yi-misc-modes >= 0.14.0
-    , yi-mode-haskell >= 0.14.0
-    , yi-mode-javascript >= 0.14.0
-    , yi-keymap-vim >= 0.14.0
-    , yi-frontend-vty >= 0.14.0
-    , yi-rope >= 0.9
-    , attoparsec
+      attoparsec
+    , base >=4.8 && <5
+    , microlens-platform >=0.3.4.0
+    , mtl >=2.2.1
+    , optparse-applicative >=0.13.0.0
     , text
+    , yi-core >=0.17.1
+    , yi-frontend-vty >=0.17.1
+    , yi-keymap-vim >=0.17.1
+    , yi-misc-modes >=0.17.1
+    , yi-mode-haskell >=0.17.1
+    , yi-mode-javascript >=0.17.1
+    , yi-rope >=0.9
   default-language: Haskell2010

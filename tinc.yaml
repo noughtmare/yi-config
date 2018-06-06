@@ -1,0 +1,16 @@
+dependencies:
+  # local dependency (will use cabal sdist)
+  - name: yi-core
+    path: /home/jaro/Data/haskell/yi/yi-core
+  - name: yi-frontend-vty
+    path: /home/jaro/Data/haskell/yi/yi-frontend-vty
+  - name: yi-keymap-vim
+    path: /home/jaro/Data/haskell/yi/yi-keymap-vim
+  - name: yi-misc-modes
+    path: /home/jaro/Data/haskell/yi/yi-misc-modes
+  - name: yi-mode-haskell
+    path: /home/jaro/Data/haskell/yi/yi-mode-haskell
+  - name: yi-mode-javascript
+    path: /home/jaro/Data/haskell/yi/yi-mode-javascript
+  - name: yi-rope
+    path: /home/jaro/Data/haskell/yi-rope
